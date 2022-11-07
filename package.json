@@ -1,6 +1,6 @@
 {
-  "name": "@ohif/cornerstone-wado-image-loader",
-  "version": "3.3.3-alpha",
+  "name": "cornerstone-wado-image-loader",
+  "version": "3.0.7",
   "description": "Cornerstone Image Loader for DICOM WADO-URI and WADO-RS",
   "keywords": [
     "DICOM",
@@ -39,11 +39,11 @@
     "test:watch": "karma start config/karma/karma-watch.js",
     "version": "node -p -e \"'export default \\'' + require('./package.json').version + '\\';'\" > src/version.js",
     "watch": "npm run clean && shx mkdir dist && npm run webpack:watch",
-    "webpack": "npm run webpack:prod",
+    "webpack": "npm run webpack:prod && npm run webpack:dev",
     "webpack:dev": "webpack --progress --config ./config/webpack/webpack-dev",
     "webpack:prod": "webpack --progress --config ./config/webpack/webpack-prod",
     "webpack:watch": "webpack --progress --debug --watch  --config ./config/webpack",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && npm run test && npm run doc:generate"
   },
   "devDependencies": {
     "@babel/core": "^7.7.2",
@@ -89,9 +89,7 @@
     "worker-loader": "^2.0.0"
   },
   "dependencies": {
-    "buffer": "^6.0.3",
     "dicom-parser": "^1.8.3",
-    "jpeg-js": "^0.4.4",
     "pako": "^1.0.10"
   },
   "husky": {
