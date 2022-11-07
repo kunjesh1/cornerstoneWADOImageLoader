@@ -1,8 +1,13 @@
-import { convertRGBColorByPixel, convertRGBColorByPlane,
-  convertYBRFullByPixel, convertYBRFullByPlane,
-  convertPALETTECOLOR } from './colorSpaceConverters/index.js';
+import {
+  convertRGBColorByPixel,
+  convertRGBColorByPlane,
+  convertYBRFullByPixel,
+  convertYBRFull422ByPixel,
+  convertYBRFullByPlane,
+  convertPALETTECOLOR,
+} from './colorSpaceConverters/index.js';
 
-function convertRGB (imageFrame, rgbaBuffer) {
+function convertRGB(imageFrame, rgbaBuffer) {
   if (imageFrame.planarConfiguration === 0) {
     convertRGBColorByPixel(imageFrame.pixelData, rgbaBuffer);
   } else {
@@ -10,7 +15,7 @@ function convertRGB (imageFrame, rgbaBuffer) {
   }
 }
 
-function convertYBRFull (imageFrame, rgbaBuffer) {
+function convertYBRFull(imageFrame, rgbaBuffer) {
   if (imageFrame.planarConfiguration === 0) {
     convertYBRFullByPixel(imageFrame.pixelData, rgbaBuffer);
   } else {
@@ -18,7 +23,7 @@ function convertYBRFull (imageFrame, rgbaBuffer) {
   }
 }
 
-export default function convertColorSpace (imageFrame, imageData) {
+export default function convertColorSpace(imageFrame, imageData) {
   const rgbaBuffer = imageData.data;
   // convert based on the photometric interpretation
 
@@ -31,10 +36,12 @@ export default function convertColorSpace (imageFrame, imageData) {
   } else if (imageFrame.photometricInterpretation === 'PALETTE COLOR') {
     convertPALETTECOLOR(imageFrame, rgbaBuffer);
   } else if (imageFrame.photometricInterpretation === 'YBR_FULL_422') {
-    convertRGB(imageFrame, rgbaBuffer);
+    convertYBRFull422ByPixel(imageFrame.pixelData, rgbaBuffer);
   } else if (imageFrame.photometricInterpretation === 'YBR_FULL') {
     convertYBRFull(imageFrame, rgbaBuffer);
   } else {
-    throw new Error(`No color space conversion for photometric interpretation ${imageFrame.photometricInterpretation}`);
+    throw new Error(
+      `No color space conversion for photometric interpretation ${imageFrame.photometricInterpretation}`
+    );
   }
 }

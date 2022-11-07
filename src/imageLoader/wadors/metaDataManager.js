@@ -1,26 +1,32 @@
+import imageIdToURI from '../imageIdToURI.js';
 
+let metadataByImageURI = [];
 
-let imageIds = [];
+function add(imageId, metadata) {
+  const imageURI = imageIdToURI(imageId);
 
-function add (imageId, metadata) {
-  imageIds[imageId] = metadata;
+  metadataByImageURI[imageURI] = metadata;
 }
 
-function get (imageId) {
-  return imageIds[imageId];
+function get(imageId) {
+  const imageURI = imageIdToURI(imageId);
+
+  return metadataByImageURI[imageURI];
 }
 
-function remove (imageId) {
-  imageIds[imageId] = undefined;
+function remove(imageId) {
+  const imageURI = imageIdToURI(imageId);
+
+  metadataByImageURI[imageURI] = undefined;
 }
 
-function purge () {
-  imageIds = [];
+function purge() {
+  metadataByImageURI = [];
 }
 
 export default {
   add,
   get,
   remove,
-  purge
+  purge,
 };

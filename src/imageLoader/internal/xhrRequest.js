@@ -1,9 +1,20 @@
 import external from '../../externalModules.js';
 import { getOptions } from './options.js';
 
-function xhrRequest (url, imageId, headers = {}, params = {}) {
+function xhrRequest(url, imageId, headers = {}, params = {}) {
   const { cornerstone } = external;
   const options = getOptions();
+
+  const errorInterceptor = xhr => {
+    if (typeof options.errorInterceptor === 'function') {
+      const error = new Error('request failed');
+
+      error.request = xhr;
+      error.response = xhr.response;
+      error.status = xhr.status;
+      options.errorInterceptor(error);
+    }
+  };
 
   // Make the request for the DICOM P10 SOP Instance
   return new Promise((resolve, reject) => {
@@ -12,19 +23,19 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
     xhr.open('get', url, true);
     xhr.responseType = 'arraybuffer';
     options.beforeSend(xhr, imageId, headers, params);
-    Object.keys(headers).forEach(function (key) {
+    Object.keys(headers).forEach(function(key) {
       xhr.setRequestHeader(key, headers[key]);
     });
 
     params.deferred = {
       resolve,
-      reject
+      reject,
     };
     params.url = url;
     params.imageId = imageId;
 
     // Event triggered when downloading an image starts
-    xhr.onloadstart = function (event) {
+    xhr.onloadstart = function(event) {
       // Action
       if (options.onloadstart) {
         options.onloadstart(event, params);
@@ -33,14 +44,18 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
       // Event
       const eventData = {
         url,
-        imageId
+        imageId,
       };
 
-      cornerstone.triggerEvent(cornerstone.events, 'cornerstoneimageloadstart', eventData);
+      cornerstone.triggerEvent(
+        cornerstone.events,
+        'cornerstoneimageloadstart',
+        eventData
+      );
     };
 
     // Event triggered when downloading an image ends
-    xhr.onloadend = function (event) {
+    xhr.onloadend = function(event) {
       // Action
       if (options.onloadend) {
         options.onloadend(event, params);
@@ -48,15 +63,19 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
 
       const eventData = {
         url,
-        imageId
+        imageId,
       };
 
       // Event
-      cornerstone.triggerEvent(cornerstone.events, 'cornerstoneimageloadend', eventData);
+      cornerstone.triggerEvent(
+        cornerstone.events,
+        'cornerstoneimageloadend',
+        eventData
+      );
     };
 
     // handle response data
-    xhr.onreadystatechange = function (event) {
+    xhr.onreadystatechange = function(event) {
       // Action
       if (options.onreadystatechange) {
         options.onreadystatechange(event, params);
@@ -68,8 +87,16 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
       // TODO: consider sending out progress messages here as we receive the pixel data
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          resolve(xhr.response, xhr);
+          options
+            .beforeProcessing(xhr)
+            .then(resolve)
+            .catch(() => {
+              errorInterceptor(xhr);
+              // request failed, reject the Promise
+              reject(xhr);
+            });
         } else {
+          errorInterceptor(xhr);
           // request failed, reject the Promise
           reject(xhr);
         }
@@ -77,7 +104,7 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
     };
 
     // Event triggered when downloading an image progresses
-    xhr.onprogress = function (oProgress) {
+    xhr.onprogress = function(oProgress) {
       // console.log('progress:',oProgress)
       const loaded = oProgress.loaded; // evt.loaded the bytes browser receive
 
@@ -101,12 +128,24 @@ function xhrRequest (url, imageId, headers = {}, params = {}) {
         imageId,
         loaded,
         total,
-        percentComplete
+        percentComplete,
       };
 
-      cornerstone.triggerEvent(cornerstone.events, 'cornerstoneimageloadprogress', eventData);
+      cornerstone.triggerEvent(
+        cornerstone.events,
+        'cornerstoneimageloadprogress',
+        eventData
+      );
+    };
+    xhr.onerror = function() {
+      errorInterceptor(xhr);
+      reject(xhr);
     };
 
+    xhr.onabort = function() {
+      errorInterceptor(xhr);
+      reject(xhr);
+    };
     xhr.send();
   });
 }
