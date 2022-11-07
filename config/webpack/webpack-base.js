@@ -6,7 +6,7 @@ const outputPath = path.join(rootPath, 'dist');
 const bannerPlugin = require('./plugins/banner');
 
 module.exports = {
-  mode: "production",
+  mode: 'development',
   context,
   entry: {
     cornerstoneWADOImageLoader: './imageLoader/index.js',
@@ -21,7 +21,7 @@ module.exports = {
     path: outputPath,
     umdNamedDefine: true,
   },
-  // devtool: 'eval-source-map',
+  devtool: 'source-map',
   externals: {
     'dicom-parser': {
       commonjs: 'dicom-parser',

@@ -7,9 +7,7 @@ const prodConfig = {
   output: {
     filename: '[name].min.js',
   },
-  // devtool: 'eval-source-map',
   optimization: {
-    // minimize:false
     minimizer: [
       new TerserPlugin({
         sourceMap: true,
