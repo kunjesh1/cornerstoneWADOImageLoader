@@ -1,6 +1,6 @@
 {
-  "name": "@ohif/cornerstone-wado-image-loader",
-  "version": "3.3.3-alpha.1",
+  "name": "cornerstone-wado-image-loader",
+  "version": "3.3.3-alpha.2",
   "description": "Cornerstone Image Loader for DICOM WADO-URI and WADO-RS",
   "keywords": [
     "DICOM",
