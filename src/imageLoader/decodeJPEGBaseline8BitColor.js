@@ -1,4 +1,5 @@
 import getMinMax from '../shared/getMinMax.js';
+import { getOptions } from './internal/options.js';
 
 /**
  * Special decoder for 8 bit jpeg that leverages the browser's built in JPEG decoder for increased performance
@@ -43,18 +44,18 @@ function decodeJPEGBaseline8BitColor(imageFrame, pixelData, canvas) {
     fileReader.onload = function() {
       const img = new Image();
 
-      img.onload = function () {
+      img.onload = function() {
+        const { decodeConfig } = getOptions();
 
-        const maxSize = Math.max(
-          img.height,
-          img.width
-        )
-        const maxSizeThresh = 1000
+        if (decodeConfig?.isDownscaleImage) {
+          const maxSize = Math.max(img.height, img.width);
+          const maxSizeThresh = 1000;
 
-        if (maxSize > maxSizeThresh) {
-          const ratio = maxSizeThresh / maxSize
-          img.width   *= ratio
-          img.height  *= ratio
+          if (maxSize > maxSizeThresh) {
+            const ratio = maxSizeThresh / maxSize;
+            img.width *= ratio;
+            img.height *= ratio;
+          }
         }
 
         canvas.height = img.height;
@@ -63,7 +64,7 @@ function decodeJPEGBaseline8BitColor(imageFrame, pixelData, canvas) {
         imageFrame.columns = img.width;
         const context = canvas.getContext('2d');
 
-        context.drawImage(this, 0, 0,img.width,img.height);
+        context.drawImage(this, 0, 0, img.width, img.height);
         const imageData = context.getImageData(0, 0, img.width, img.height);
         const end = new Date().getTime();
 

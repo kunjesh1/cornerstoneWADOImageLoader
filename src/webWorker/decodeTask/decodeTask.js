@@ -59,7 +59,7 @@ function handler(data, doneCallback) {
   }
 
   // snippet for resizing the image pixel data for Mobile
-  if (imageFrame.samplesPerPixel === 1) {
+  if (imageFrame.samplesPerPixel === 1 && decodeConfig?.isDownscaleImage) {
     const maxSize = Math.max(imageFrame.columns, imageFrame.rows);
     const maxSizeThresh = 1000;
     if (maxSize > maxSizeThresh) {
